@@ -1,0 +1,27 @@
+{
+  "name": "shpFile",
+  "version": "0.0.1",
+  "description": "Simple ESRI SHP file to GeoJSON convertor",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-contrib-jshint": "~0.11.3",
+    "grunt-contrib-watch": "~0.6.1"
+  },
+  "keywords": [
+    "shp",
+    "geojson",
+    "gis",
+    "map"
+  ],
+  "author": "Vasyl Moskalov",
+  "license": "MIT",
+  "main": "shpFile.js",
+  "dependencies": {
+    "dbfstream": "^1.0.20",
+    "iconv-lite": "^0.4.17",
+    "proj4": "^2.4.3"
+  }
+}
