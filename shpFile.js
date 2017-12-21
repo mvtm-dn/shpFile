@@ -62,10 +62,10 @@ var genReadArray=function(type){
 
  
     parseFile=function(source,translate) {
-        EventEmitter.call(this);
         if (!(this instanceof parseFile)) {
             return new parseFile(source,translate);
         }
+        EventEmitter.call(this);
         this.translate=translate || _dummyTranslate;
         this._preinit();
         source=(Array.isArray(source)?source:[source]);
