@@ -50,19 +50,15 @@ Example of usage:
 
 ### shapes
 `shapeObject.shapes` is an array of parsed shapes. 
-Field | Value | Present in
-------|-------|--------
-type  | type of shape| 0,1,3,5,8,11
-------|-------|--------
-points|array of points|1,3,5,8,11
-------|-------|--------
-bbox  |bounding box|3,5,8
-------|-------|--------
-parts |list of parts| 8
-------|-------|--------
+
+|Field | Value | Present in|
+|------|:-------:|:--------:|
+|type  | type of shape| 0,1,3,5,8,11|
+|points|array of points|1,3,5,8,11|
+|bbox  |bounding box|3,5,8|
+|parts |list of parts| 8|
+
 ### TODO
 TODO List
 * Parse rest of shape types
-
-
 
