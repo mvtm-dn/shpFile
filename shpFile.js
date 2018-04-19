@@ -183,6 +183,13 @@ parseFile.prototype._typePoint=function(buffer,header,offset) { // type===1;
     return {type:header.type, points:[this._readOnePoint(buffer,offset+4)]};
 };
 
+parseFile.prototype._typePointZ=function(buffer,header,offset) { // type===11;
+    var zm=readDouble(buffer,offset+20,2)
+    return {type:header.type, points:[this._readOnePoint(buffer,offset+4)],z:zm[0],m:zm[1]};
+};
+
+
+
 parseFile.prototype._typeMultiPoint=function(buffer,header,offset) { // type===8
     var len=readInt(buffer,offset+36)[0];
     return {type:header.type, bbox:this._readBbox(buffer,offset+4),points:this._readPoints(buffer,offset+40,len)};
@@ -194,8 +201,12 @@ parseFile.prototype._typePolyLine=function(buffer,header,offset) { // type===3
     return {type:header.type,bbox:this._readBbox(buffer,offset+4),parts:readInt(buffer,offset+44,numParts),points:this._readPoints(buffer,offset+44+numParts*4,numPoints)};
 };
 
-parseFile.readers=[parseFile.prototype._typeNoShape,parseFile.prototype._typePoint,parseFile.prototype._typeNoShape,parseFile.prototype._typePolyLine,
-    parseFile.prototype._typeNoShape,parseFile.prototype._typePolyLine,parseFile.prototype._typeNoShape,parseFile.prototype._typeNoShape,parseFile.prototype._typeMultiPoint];
+parseFile.readers=[
+    parseFile.prototype._typeNoShape,parseFile.prototype._typePoint,parseFile.prototype._typeNoShape,parseFile.prototype._typePolyLine,
+    parseFile.prototype._typeNoShape,parseFile.prototype._typePolyLine,parseFile.prototype._typeNoShape,
+    parseFile.prototype._typeNoShape,parseFile.prototype._typeMultiPoint,parseFile.prototype._typeNoShape,
+    parseFile.prototype._typeNoShape,parseFile.prototype._typePointZ
+    ];
 
 parseFile.prototype._point2json=function(shape) {
     if (shape.type!==1) {
@@ -203,6 +214,14 @@ parseFile.prototype._point2json=function(shape) {
     }
     return {type:"Point",coordinates:[shape.points[0].x,shape.points[0].y]};
 };
+
+parseFile.prototype._pointZ2json=function(shape) {
+    if (shape.type!==11) {
+        return null;
+    }
+    return {type:"Point",coordinates:[shape.points[0].x,shape.points[0].y],properties:{z:shape.z,m:shape.m}};
+};
+
 
 parseFile.prototype._polyLine2json=function(shape) {
     if (shape.type!==3) {
@@ -255,7 +274,11 @@ parseFile.prototype._polygon2json=function(shape) {
 };
 
 
-parseFile.convertors=[null,parseFile.prototype._point2json,null,parseFile.prototype._polyLine2json,null,parseFile.prototype._polygon2json,null,null,parseFile.prototype._pointList2json];
+parseFile.convertors=[
+    null,parseFile.prototype._point2json,null,parseFile.prototype._polyLine2json,null,
+    parseFile.prototype._polygon2json,null,null,parseFile.prototype._pointList2json,
+    null,null,parseFile.prototype._pointZ2json
+    ];
 
 
 parseFile.prototype.toString=function() {
@@ -273,7 +296,7 @@ parseFile.prototype.toGeoJSON=function(index) {
         if (convertor) {
             if((data=convertor(shape))) {
                 if (shape.properties) {
-                    data.properties=shape.properties;
+                    data.properties=Object.assign(shape.properties,data.properties);
                 }
                 ret.geometries.push(data);
             }

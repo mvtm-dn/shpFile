@@ -3,4 +3,6 @@ package-lock.json
 *.dbf
 *.shp
 test.js
+test
+test/*
 
