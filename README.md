@@ -23,12 +23,12 @@ Example of usage:
 
     let geoJSONs=[];
     shapeFile(filename).on("error",(error)=>{
-        console.log("Error open {0} - {1}".format(shapeSource,error));
+        console.log("Error open %s - %s",filename,error);
     })
-    .on("end",(shapes){
-        console.log("Got {0} shape(s)".format(shapes.length));
+    .on("end",(shapes)=>{
+        console.log("Got %d shape(s)",shapes.length);
         for(let i=0;i<this.length;i+=1) {
-            geoJSONs.push(this.toGeoJSON(i));,
+            geoJSONs.push(shapes.toGeoJSON(i));,
         }
     });
     
@@ -36,9 +36,10 @@ Example of usage:
 ## shapeFile object
 ### methods
 
-`shapeFile(sources[,translate])` Create parser object and start parsing shape file. Parameters
+`shapeFile(sources[,translate[,filter]])` Create parser object and start parsing shape file. Parameters
 * `sources` - either name of shape file or list `["name of shape file", "name of dbf file"]`
 * `translate` - `proj4(..)` instance. Can be omitted. 
+* `filter` - filter expression. If filter(shape)===false then shape don't append at resulting list
 
 `length` - returns numbers of readed objects
 `toString()` - returns string representation of shape file as a javascript Object
@@ -56,7 +57,9 @@ Example of usage:
 |type  | type of shape| 0,1,3,5,8,11|
 |points|array of points|1,3,5,8,11|
 |bbox  |bounding box|3,5,8|
-|parts |list of parts| 8|
+|parts |list of parts|3,5|
+|z|z value|11|
+|m|m value|11|
 
 ### TODO
 TODO List

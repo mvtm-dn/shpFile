@@ -61,9 +61,15 @@ var genReadArray=function(type){
     },
 
  
-    parseFile=function(source,translate) {
+    parseFile=function(source,translate,filter) {
         if (!(this instanceof parseFile)) {
-            return new parseFile(source,translate);
+            return new parseFile(source,translate,filter);
+        }
+        if (filter) {
+            this._filter=filter;
+        }
+        else {
+            this._filter=()=>true;
         }
         EventEmitter.call(this);
         this.translate=translate || _dummyTranslate;
@@ -125,14 +131,18 @@ parseFile.prototype._preinit=function() {
 parseFile.prototype.parseBuffer=function() {
     if (this._data && this._data.length) {
         var buffer=Buffer.concat(this._data);
-        var shapes=[],offset=100,header,reader,bbox=this._readBbox(buffer,36);
+        var shapes=[],offset=100,header,reader,bbox=this._readBbox(buffer,36),currentShape,shapeIndex=0;
         while(offset<buffer.length) {
             header=this._readRecordHeader(buffer,offset);
             reader=header.type<parseFile.readers.length?parseFile.readers[header.type]:parseFile.prototype._typeNoShape;
-            shapes.push(reader.apply(this,[buffer,header,offset+8]));
-            if (this.props[shapes.length-1]) {
-                shapes[shapes.length-1].properties=this.props[shapes.length-1];
+            currentShape=reader.apply(this,[buffer,header,offset+8])
+            if (this.props[shapeIndex]) {
+                currentShape.properties=this.props[shapeIndex];
             }
+            if (this._filter(currentShape)) {
+                shapes.push(currentShape);
+            }
+            shapeIndex+=1;
             offset+=(4+header.size)*2;
         }
         this.shapes=shapes;
@@ -148,8 +158,8 @@ parseFile.prototype.parseBuffer=function() {
 
 parseFile.prototype._readBbox=function(buffer,offset) {
     var x=readDouble(buffer,offset,2),y=readDouble(buffer,offset+16,2),ret=[];
-    ret.push.apply(ret,this.translate.forward([x[0],y[0]]));
-    ret.push.apply(ret,this.translate.forward([x[1],y[1]]));
+    ret.push.apply(ret,this.translate.forward([x[0],x[1]]));
+    ret.push.apply(ret,this.translate.forward([y[0],y[1]]));
     return ret;
 };
 
@@ -306,7 +316,7 @@ parseFile.prototype.toGeoJSON=function(index) {
         ret=ret.geometries[0];
     }
     if (bbox) {
-        ret.bbox=[bbox[0],bbox[3],bbox[2],bbox[1]]; // south-west and north-east edges
+        ret.bbox=[bbox[0],bbox[1],bbox[2],bbox[3]]; // south-west and north-east edges
     }
     return ret;
 };
