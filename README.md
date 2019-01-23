@@ -6,6 +6,7 @@ Very simple ESRI SHP file to GeoJSON convertor. In fact parse subset of ESRI SHP
 *  5 Polygon
 *  8 MultiPoint
 * 11 PointZ
+* 15 PolygonZ
 
 # Installation
 
@@ -54,14 +55,16 @@ Example of usage:
 
 |Field | Value | Present in|
 |------|:-------:|:--------:|
-|type  | type of shape| 0,1,3,5,8,11|
-|points|array of points|1,3,5,8,11|
-|bbox  |bounding box|3,5,8|
-|parts |list of parts|3,5|
+|type  | type of shape| 0,1,3,5,8,11,15|
+|points|array of points|1,3,5,8,11,15|
+|bbox  |bounding box|3,5,8,15|
+|parts |list of parts|3,5,15|
 |z|z value|11|
+|z|array of z values|15
 |m|m value|11|
-
+|zmin,zmax|zmin and zmax|15|
 ### TODO
 TODO List
+* Extract m values for polylineZ
 * Parse rest of shape types
 

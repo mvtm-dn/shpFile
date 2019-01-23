@@ -211,11 +211,23 @@ parseFile.prototype._typePolyLine=function(buffer,header,offset) { // type===3
     return {type:header.type,bbox:this._readBbox(buffer,offset+4),parts:readInt(buffer,offset+44,numParts),points:this._readPoints(buffer,offset+44+numParts*4,numPoints)};
 };
 
+parseFile.prototype._typePolyLineZ=function(buffer,header,offset) { // type===15
+    var numParts=readInt(buffer,offset+36)[0],numPoints=readInt(buffer,offset+40)[0],x=44+numParts*4,y=x+16*numPoints,//z=Y+16+8*numPoints,
+        zm=readDouble(buffer,offset+y,2)
+//    console.log(numParts,numPoints);
+    return {
+        type:header.type,bbox:this._readBbox(buffer,offset+4),parts:readInt(buffer,offset+44,numParts),points:this._readPoints(buffer,offset+x,numPoints),
+        zmin:zm[0],zmax:zm[1],z:readDouble(buffer,offset+y+16,numPoints)
+    };
+};
+
+
 parseFile.readers=[
     parseFile.prototype._typeNoShape,parseFile.prototype._typePoint,parseFile.prototype._typeNoShape,parseFile.prototype._typePolyLine,
     parseFile.prototype._typeNoShape,parseFile.prototype._typePolyLine,parseFile.prototype._typeNoShape,
     parseFile.prototype._typeNoShape,parseFile.prototype._typeMultiPoint,parseFile.prototype._typeNoShape,
-    parseFile.prototype._typeNoShape,parseFile.prototype._typePointZ
+    parseFile.prototype._typeNoShape,parseFile.prototype._typePointZ,parseFile.prototype._typeNoShape,parseFile.prototype._typeNoShape,
+    parseFile.prototype._typeNoShape,parseFile.prototype._typePolyLineZ
     ];
 
 parseFile.prototype._point2json=function(shape) {
@@ -283,11 +295,33 @@ parseFile.prototype._polygon2json=function(shape) {
 
 };
 
+parseFile.prototype._polygonZ2json=function(shape) {
+    if (shape.type!==15) {
+        return null;
+    }
+    var coordinates=[];
+    shape.parts.forEach((shapeIndex,index,parts)=>{
+        var start=shapeIndex,end=index===parts.length-1?shape.points.length:parts[index+1],polygon=[];
+        for(var i=shapeIndex;i<end;i+=1) {
+            polygon.push([shape.points[i].x,shape.points[i].y]);    
+        }
+        if (polygon.length) {
+            coordinates.push(polygon);
+        }
+    });
+    if (coordinates.length) {
+        return {type:"Polygon",coordinates:coordinates,properites:{z:{zmin:shape.zmin,zmax:shape.zmax,z:shape.z}}};
+    }
+    return null;
+
+};
+
+
 
 parseFile.convertors=[
     null,parseFile.prototype._point2json,null,parseFile.prototype._polyLine2json,null,
     parseFile.prototype._polygon2json,null,null,parseFile.prototype._pointList2json,
-    null,null,parseFile.prototype._pointZ2json
+    null,null,parseFile.prototype._pointZ2json,null,null,null,parseFile.prototype._polygonZ2json
     ];
 
 

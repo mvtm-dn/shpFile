@@ -1,0 +1,9 @@
+.git
+.git/*
+.gitignore
+*.tgz
+test
+test/*
+test.js
+Gruntfile.js
+
